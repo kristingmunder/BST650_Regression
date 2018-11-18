@@ -1,0 +1,53 @@
+---
+title: "Regression Assignment 2"
+author: "Kristin Gmunder"
+date: "11/16/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### 2. Calculate Multiple Regression Estimates
+Now consider the multiple linear regression model. Modify your function from last class to take in a numeric response vector `y` and a numeric design matrix `X`. This function should return a *named* vector of the regression coefficients from the linear model
+\[
+\hat{\textbf{y}} = \beta_0 + \beta_1\textbf{x}_1 + \beta_2\textbf{x}_2 + \ldots + \beta_p\textbf{x}_p.
+\]
+Your function should use the formula you derived in Part 1 to calculate these estimates directly (that is, without a call to the `lm()` or any other modelling function in R).
+
+A few details:
+
+1. If the data matrix `X` has column names, the names for the vector of regression coefficients should be `"Intercept"` plus those names. Otherwise, the names should be `"Intercept"`, `"beta1"`, `"beta2"`, ..., `"betap"` (where `p` is the number of predictors in `X`). See the `paste0()` help documentation. 
+2. Remember that the design matrix `X` probably doesn't have the leading column of 1s that we need to estimate $\beta_0$.
+3. Matrix multiplication uses different functions in R. See the help files for `t()`, `%*%`, and `solve()`.
+4. Matrix math in R is different between matrices and data frames (*why?*). Make sure to account for both of these input options.
+
+Use your function to calculate the regression coefficients for
+\[
+\text{chol}_i = \beta_0 + \beta_1\text{age}_i + \beta_2\text{weight}_i + \beta_3\text{sbp}_i + \varepsilon_i,\quad i = 1, \ldots, n
+\]
+from the WCGS data. Compare the intercept and coefficients you calculated to those returned by the `lm()` function. I get this output:
+```{r echo = FALSE}
+wcgs_df <- read.csv(file = "/Users/KristinGmunder/Documents/wcgs.csv", header = TRUE, stringsAsFactors = FALSE)
+lm(chol ~ age + weight + sbp, data = wcgs_df)
+```
+
+```{r}
+findTheBetas <- function(x, y) {
+design <- as.matrix(x)
+y <- as.matrix(y)
+design <- cbind(rep(1, times = nrow(x)), design)
+beta <-  solve(design%*%t(design)) %*% (t(design)%*%y)
+if (is.na(colnames(x)) == FALSE) {
+  rownames(beta) <- c("intercept", paste0(1: (ncol(x) - 1), c("beta")))
+} else {  
+  rownames(beta) <- c("intercept", colnames(x))
+ }
+}  
+
+test <- matrix(c(wcgs_df$age, wcgs_df$weight, wcgs_df$sbp))
+findTheBetas(test, wcgs_df$chol) 
+```
+
+
