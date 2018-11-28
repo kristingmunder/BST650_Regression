@@ -1,0 +1,51 @@
+---
+title: "Regression Assignment 3"
+author: "Kristin Gmunder"
+date: "11/26/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Setup
+wcgs_df <- read.csv(file = "/Users/KristinGmunder/Documents/wcgs.csv", header = TRUE, stringsAsFactors = FALSE)
+chol_mod <- lm(chol ~ age + weight + sbp, data = wcgs_df)
+```
+# Assumption 3: Model Errors are Homoscedastic
+
+### Testing graphically:
+```{r}
+plot(chol_mod)
+```
+
+Looking at the Residuals vs Fitted, the errors are homoscedastic if there is an even and random distribution of errors, and if the red line is straight.  Here the red line is almost straight, but the errors do not appear to be evenly distributed. Source: [link] https://datascienceplus.com/how-to-detect-heteroscedasticity-and-rectify-it/
+
+### Testing statistically:
+H0: Errors are homoscedastic
+H1: Errors are heteroscedastic
+```{r}
+library(car)
+ncvTest(chol_mod)
+```
+
+With a p value of 0.28529, at a significance level of 0.05, I fail to reject the null hypothesis that the variance of the residuals is constant. There is insufficient evidence to suggest that the errors are heteroscedastic. Source: [link] https://www.statmethods.net/stats/rdiagnostics.html
+
+
+
+# Assumption 4: Model Errors are Independent
+
+### Testing statistically:
+```{r}
+durbinWatsonTest(chol_mod)
+acf(chol_mod$residuals)
+```
+
+\[
+H_0: \rho = 0 \\
+H_1: \rho \ne 0
+\]
+
+With a p value of 0.008, at a significance level of 0.05, I reject the null hypothesis of zero autocorrelation within the residuals. Statistically, there is sufficient evidence to suggest that there may be autocorrelation.  The estimated correlation is 0.046, meaning there is very little correlation among the residuals. The Durbin Watson statistic is 1.908, meaning that there is slightpositive correlation (since  value of 2 means no autocorrelation).  However, a correlation of 0.046 has no practical significace as it is so small. Source: [link] https://www.statmethods.net/stats/rdiagnostics.html

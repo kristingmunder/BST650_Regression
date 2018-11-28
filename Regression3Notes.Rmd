@@ -1,0 +1,49 @@
+---
+title: "RegressionNotes3"
+author: "Kristin Gmunder"
+date: "11/26/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+wcgs_df <- read.csv(file = "/Users/KristinGmunder/Documents/wcgs.csv", header = TRUE, stringsAsFactors = FALSE)
+chol_mod <- lm(chol ~ age + weight + sbp, data = wcgs_df)
+```
+
+### Assumption 1: Model Errors are Normally Distributed
+Overall, the residuals appear to be normally distributed, based on the histogram, but we may have a few outliers.
+```{r}
+str(chol_mod)
+# Histogram
+hist(chol_mod$residuals)
+
+# QQ-Plot
+qqnorm(chol_mod$residuals)
+qqline(chol_mod$residuals)
+```
+
+Try a transformation
+```{r}
+hist(chol_mod$residuals)
+cholSq_mod <- lm(sqrt(chol) ~ age + weight + sbp, data = wcgs_df)
+hist(cholSq_mod$residuals)
+qqnorm(cholSq_mod$residuals)
+qqline(cholSq_mod$residuals)
+
+```
+That's probably worse. Let's leave the data alone...
+
+### Assumption 2: Model Errors are Centered at 0
+The quick and dirty way would be to look at the center of the histogram.  We can also perform a statistical test:
+```{r}
+t.test(chol_mod$residuals, mu = 0)
+```
+O is dead-set in the middle of the CI.  We're rather cocnfident that the meant of the residuals is close enough to 0.
+
+### Assumption 3: Model Errors are Homoskedastic
+
